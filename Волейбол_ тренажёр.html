@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Волейбол: тренажёр</title>
+<style>
+:root{--bg:#f3f7fb;--card:#fff;--ink:#1d2b3a;--mute:#6b7c8d;--line:#d6e0ea;--main:#1e88e5;--mainD:#1565c0;--ok:#2e9e5b;--okBg:#dff4e6;--bad:#d9453d;--badBg:#fde4e2;--sun:#f5a623;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121b25;--card:#1b2835;--ink:#e8eef4;--mute:#93a4b5;--line:#2c3d4e;--okBg:#1c3a2a;--badBg:#40201e}}
+:root[data-theme="dark"]{--bg:#121b25;--card:#1b2835;--ink:#e8eef4;--mute:#93a4b5;--line:#2c3d4e;--okBg:#1c3a2a;--badBg:#40201e}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"Nunito","Trebuchet MS",system-ui,sans-serif}
+.app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:16px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.bar{flex:1;height:14px;background:var(--line);border-radius:7px;overflow:hidden}
+.fill{height:100%;width:0;background:var(--ok);border-radius:7px;transition:width .3s}
+.hearts{font-weight:800;color:var(--bad);font-size:18px;min-width:44px;text-align:right}
+h1{font-size:30px;line-height:1.15;margin:8px 0 12px}
+h2{font-size:22px;line-height:1.3;margin:0 0 20px}
+p{color:var(--mute);line-height:1.5;margin:0 0 16px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{font:inherit;font-weight:700;font-size:17px;text-align:left;color:var(--ink);background:var(--card);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:14px 16px;cursor:pointer}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.opt.ok{border-color:var(--ok);background:var(--okBg)}
+.opt.bad{border-color:var(--bad);background:var(--badBg)}
+.opt:disabled{cursor:default}
+.foot{margin-top:auto;padding-top:20px}
+.msg{border-radius:14px;padding:12px 14px;margin-bottom:12px;font-weight:700;display:none}
+.msg.ok{display:block;background:var(--okBg);color:var(--ok)}
+.msg.bad{display:block;background:var(--badBg);color:var(--bad)}
+.btn{width:100%;font:inherit;font-weight:800;font-size:17px;color:#fff;background:var(--main);border:0;border-bottom:4px solid var(--mainD);border-radius:14px;padding:15px;cursor:pointer}
+.btn:disabled{background:var(--line);border-color:var(--line);color:var(--mute);cursor:default}
+.big{font-size:64px;margin:20px 0 0;text-align:center}
+.stats{display:flex;gap:10px;margin:16px 0}
+.stat{flex:1;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+.stat b{display:block;font-size:24px}
+.stat span{color:var(--mute);font-size:13px}
+.hide{display:none}
+@media (prefers-reduced-motion:reduce){.fill{transition:none}}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+var Q=[
+["Сколько игроков одной команды одновременно на поле?","6",["4","5","7"]],
+["Высота сетки у мужчин?","2 м 43 см",["2 м 24 см","2 м 10 см","2 м 55 см"]],
+["Высота сетки у женщин?","2 м 24 см",["2 м 43 см","2 м 15 см","2 м 30 см"]],
+["Размер площадки?","18 × 9 м",["16 × 8 м","20 × 10 м","15 × 9 м"]],
+["Сколько секунд даётся на подачу?","8",["5","10","12"]],
+["В какую сторону идёт ротация?","По часовой стрелке",["Против часовой стрелки","Зигзагом","Без порядка"]],
+["Когда команда делает переход?","Когда выиграла розыгрыш на приёме",["После каждого очка","Когда выиграла свою подачу","Каждые 5 минут"]],
+["Из какой зоны выполняется подача?","Зона 1 (справа сзади)",["Зона 2","Зона 4","Зона 6"]],
+["Чем принимают мяч при передаче сверху?","Подушечками пальцев",["Ладонями","Кулаками","Предплечьями"]],
+["Чем принимают мяч при передаче снизу?","Предплечьями",["Пальцами","Кулаком одной руки","Локтями"]],
+["Какая подача называется планирующей?","Удар по центру мяча без вращения",["Сильный удар с закруткой","Бросок двумя руками","Подача снизу в пол"]],
+["Какая подача называется силовой?","Мячу придают вращение и скорость",["Мяч «плавает» без вращения","Подача только снизу","Подача одной рукой в сетку"]],
+["Какая стойка самая глубокая?","Низкая",["Высокая","Средняя","Прямая"]],
+["Правильный порядок фаз нападающего удара?","Разбег, прыжок, замах, удар, приземление",["Прыжок, разбег, удар, замах","Замах, разбег, приземление, удар","Удар, прыжок, разбег, замах"]],
+["Когда используют падение с перекатом на спину?","Для самых дальних мячей",["Для подачи","Для блока","Для замены игрока"]],
+["Где у блокирующего руки?","Над сеткой, пальцы расставлены",["Внизу у пола","За спиной","Прижаты к груди"]],
+["Сколько игроков в групповом блоке?","2–3",["1","4","6"]]
+];
+var app=document.getElementById("app"),i,hp,xp,right,streak,best=0,locked;
+try{best=+localStorage.getItem("vb_best")||0}catch(e){}
+function sh(a){a=a.slice();for(var k=a.length-1;k>0;k--){var j=Math.floor(Math.random()*(k+1)),t=a[k];a[k]=a[j];a[j]=t}return a}
+function start(){
+ app.innerHTML='<div class="big">🏐</div><h1>Волейбол: тренажёр</h1><p>Ответь на '+Q.length+' вопросов по конспекту. Три ошибки — и урок заканчивается. Рекорд серии: '+best+'.</p><div class="foot"><button class="btn" id="go">Начать</button></div>';
+ document.getElementById("go").onclick=function(){i=0;hp=3;xp=0;right=0;streak=0;Q=sh(Q);show()};
+}
+function show(){
+ var q=Q[i],o=sh([q[1]].concat(q[2]));locked=false;
+ app.innerHTML='<div class="top"><div class="bar"><div class="fill" style="width:'+(i/Q.length*100)+'%"></div></div><div class="hearts">❤️ '+hp+'</div></div><h2></h2><div class="opts"></div><div class="foot"><div class="msg" id="msg"></div><button class="btn" id="nx" disabled>Проверить</button></div>';
+ app.querySelector("h2").textContent=q[0];
+ var box=app.querySelector(".opts"),pick=null;
+ o.forEach(function(t){var b=document.createElement("button");b.className="opt";b.textContent=t;
+  b.onclick=function(){if(locked)return;pick=t;box.querySelectorAll(".opt").forEach(function(x){x.style.borderColor=""});b.style.borderColor="var(--main)";document.getElementById("nx").disabled=false};
+  box.appendChild(b)});
+ var nx=document.getElementById("nx");
+ nx.onclick=function(){
+  if(!locked){
+   locked=true;var ok=pick===q[1],m=document.getElementById("msg");
+   box.querySelectorAll(".opt").forEach(function(x){x.disabled=true;x.style.borderColor="";if(x.textContent===q[1])x.classList.add("ok");else if(x.textContent===pick)x.classList.add("bad")});
+   if(ok){right++;xp+=10;streak++;if(streak>best){best=streak;try{localStorage.setItem("vb_best",best)}catch(e){}}m.className="msg ok";m.textContent="Верно! +10 XP"}
+   else{hp--;streak=0;m.className="msg bad";m.textContent="Правильный ответ: "+q[1]}
+   app.querySelector(".hearts").textContent="❤️ "+hp;
+   nx.textContent=(hp===0||i===Q.length-1)?"Завершить":"Дальше";
+  }else{
+   if(hp===0||i===Q.length-1)end();else{i++;show()}
+  }
+ };
+}
+function end(){
+ var win=hp>0;
+ app.innerHTML='<div class="big">'+(win?'🏆':'💪')+'</div><h1>'+(win?'Урок пройден!':'Попробуй ещё раз')+'</h1><p>'+(win?'Ты готова к показу и ответам на оценку 10.':'Повтори конспект и сыграй снова.')+'</p><div class="stats"><div class="stat"><b>'+xp+'</b><span>XP</span></div><div class="stat"><b>'+right+'/'+(i+1)+'</b><span>верно</span></div><div class="stat"><b>'+best+'</b><span>рекорд серии</span></div></div><div class="foot"><button class="btn" id="again">Ещё раз</button></div>';
+ document.getElementById("again").onclick=start;
+}
+start();
+</script>
+</body>
+</html>
